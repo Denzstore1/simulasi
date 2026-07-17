@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>⚠️ YOU ARE AN IDIOT ⚠️</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            overflow: hidden;
+            background: #000;
+            color: #fff;
+            font-family: 'Press Start 2P', cursive;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+        }
+
+        #start-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        #title {
+            font-size: 2.8rem;
+            color: #fff;
+            text-shadow: 0 0 15px #fff;
+            animation: fast-flicker 70ms infinite alternate;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        #start-btn {
+            padding: 25px 60px;
+            font-size: 1.8rem;
+            background: transparent;
+            color: #fff;
+            border: 6px solid #fff;
+            cursor: pointer;
+            text-transform: uppercase;
+            animation: fast-flicker 100ms infinite alternate;
+        }
+
+        .popup {
+            position: absolute;
+            background: #000;
+            border: 5px solid #fff;
+            padding: 20px;
+            min-width: 280px;
+            color: #fff;
+            text-align: center;
+            box-shadow: 0 0 25px #fff;
+            animation: popup-float 5s linear infinite, fast-flicker 70ms infinite alternate;
+        }
+
+        .popup-content {
+            font-size: 1.7rem;
+            font-weight: bold;
+        }
+
+        .face {
+            font-size: 4.2rem;
+            margin: 15px 0;
+        }
+
+        #stop-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 50px;
+            background: #000;
+            color: #fff;
+            border: 5px solid #fff;
+            font-size: 1.4rem;
+            z-index: 9999;
+            display: none;
+        }
+
+        #timer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #000;
+            color: #fff;
+            padding: 12px 25px;
+            border: 4px solid #fff;
+            font-size: 1.2rem;
+            z-index: 9999;
+            display: none;
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(transparent 50%, rgba(255,255,255,0.2) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            animation: scan 1.2s linear infinite;
+            z-index: 9998;
+            opacity: 0.35;
+        }
+
+        @keyframes fast-flicker { 0% {opacity:1} 100%{opacity:0.25} }
+        @keyframes popup-float { 0%{transform:rotate(0deg) translate(0,0)} 25%{transform:rotate(15deg) translate(50px,-60px)} 50%{transform:rotate(-12deg) translate(-40px,70px)} 75%{transform:rotate(10deg) translate(45px,-50px)} 100%{transform:rotate(0deg) translate(0,0)} }
+        @keyframes scan { 0%{background-position:0 0} 100%{background-position:0 1000px} }
+        .shake { animation: shake 70ms infinite alternate; }
+        @keyframes shake { from{transform:translate(-4px,4px)} to{transform:translate(4px,-4px)} }
+    </style>
+</head>
+<body>
+    <div id="start-screen">
+        <div id="title">YOU ARE<br>AN IDIOT</div>
+        <button id="start-btn">PLAY SIMULATION</button>
+    </div>
+
+    <div id="timer">00:00</div>
+    <button id="stop-btn">STOP CHAOS</button>
+    <div class="scanline"></div>
+
+    <audio id="audio" loop preload="auto"></audio>
+
+    <script>
+        let isRunning = false;
+        let timerInterval = null;
+        let seconds = 0;
+        let audio;
+
+        function createPopup() {
+            if (!isRunning) return;
+
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            
+            const x = Math.random() * (window.innerWidth - 320);
+            const y = Math.random() * (window.innerHeight - 320);
+            
+            popup.style.left = `${x}px`;
+            popup.style.top = `${y}px`;
+
+            popup.innerHTML = `
+                <div class="popup-content">
+                    <div class="face">☻</div>
+                    YOU ARE<br>AN IDIOT
+                    <div class="face">☺</div>
+                </div>
+            `;
+
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 10000);
+        }
+
+        function startSimulation() {
+            document.getElementById('start-screen').style.display = 'none';
+            isRunning = true;
+
+            document.getElementById('stop-btn').style.display = 'block';
+            document.getElementById('timer').style.display = 'block';
+
+            // === AUDIO LANGSUNG PLAY ===
+            audio = document.getElementById('audio');
+            audio.play().catch(() => {
+                console.log("Audio diputar");
+            });
+
+            document.body.classList.add('shake');
+
+            // Pop-up super cepat
+            setInterval(() => {
+                if (isRunning) createPopup();
+            }, 110);
+
+            // Timer
+            seconds = 0;
+            timerInterval = setInterval(() => {
+                if (!isRunning) return;
+                seconds++;
+                const min = String(Math.floor(seconds / 60)).padStart(2, '0');
+                const sec = String(seconds % 60).padStart(2, '0');
+                document.getElementById('timer').textContent = `\( {min}: \){sec}`;
+            }, 1000);
+        }
+
+        function stopSimulation() {
+            isRunning = false;
+            if (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+            }
+            document.body.classList.remove('shake');
+            document.getElementById('stop-btn').style.display = 'none';
+            document.getElementById('timer').style.display = 'none';
+            document.getElementById('start-screen').style.display = 'flex';
+            if (timerInterval) clearInterval(timerInterval);
+        }
+
+        // Setup Audio Link
+        window.addEventListener('load', () => {
+            audio = document.getElementById('audio');
+            
+            // Link audio (bisa diganti)
+            audio.src = "https://files.catbox.moe/dkgnca.mp3";
+            
+            // Kalau mau ganti lagu, ganti link di atas dengan link mp3 langsung
+        });
+
+        document.getElementById('start-btn').addEventListener('click', startSimulation);
+        document.getElementById('stop-btn').addEventListener('click', stopSimulation);
+    </script>
+</body>
+</html>
